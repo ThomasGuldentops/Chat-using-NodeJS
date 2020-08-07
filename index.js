@@ -5,7 +5,6 @@ const ent = require("ent");
 const io = require("socket.io").listen(server);
 const morgan = require('morgan')
 const fs = require("fs")
-const cookieParser = require("cookie-parser");
 const pathBuilder = require("path");
 const publicDir = pathBuilder.join(__dirname, "/public");
 
@@ -38,49 +37,31 @@ app.use(express.static(pathBuilder.join(publicDir, "sounds")));
 
 //Image folder
 app.use(express.static(pathBuilder.join(publicDir, "images/photo_profile/")));
+
 //Logger
 app.use(morgan('dev'));
 
-//session
-app.use(cookieParser());
 
 //Routes
 app.get("/", (req, res) => {
     res.render("client.ejs");
+    res.end();
 });
 
+
+
 io.sockets.on("connection", (socket) => {
+    socket.cptNotif = 0;
+
+    console.log(" ------- \nId + nbNotif : " + socket.id + " : " + socket.cptNotif);
     //let allEmoji = JSON.parse("raw.githubusercontent.com/omnidan/node-emoji/master/lib/emoji.json");
     //console.log("All emojis : " + allEmoji.key);
 
 
-    const https = require('https');
-
-    let url = "https://raw.githubusercontent.com/omnidan/node-emoji/master/lib/emoji.json";
-
-    https.get(url, (res) => {
-        let body = "";
-
-        res.on("data", (chunk) => {
-            body += chunk;
-        });
-
-        res.on("end", () => {
-            try {
-                let json = JSON.parse(body);
-                console.log("JSON : " + json["coffee"]);
-            } catch (error) {
-                console.error(error.message);
-            };
-        });
-
-    }).on("error", (error) => {
-        console.error(error.message);
-    });
-
     //get pseudo
     socket.on("pseudo", (pseudo) => {
         socket.pseudo = ent.encode(pseudo);
+
 
         //set a default profile picture
         socket.profilePicture = "images/photo_profile/default.svg";
@@ -94,15 +75,20 @@ io.sockets.on("connection", (socket) => {
         console.log(pseudo + " à rejoint le chat ! ");
     });
 
-
+    socket.on("resetNotification", () => {
+        socket.cptNotif = 0;
+        socket.emit("resetNotificationClient", socket.cptNotif); //prblème de synchro ?
+    });
 
 
     //receive message from a client
     socket.on("message_client", (message) => {
         message = ent.encode(message);
         io.emit("message_client", { pseudo: socket.pseudo, message: message, pictureProfile: socket.profilePicture });
-        console.log(socket.pseudo + " à écrit : " + message);
 
+        console.log("socket.cptNotif : " + socket.cptNotif);
+        socket.cptNotif++;
+        socket.broadcast.emit("newNotif", { cptNotif: socket.cptNotif, pseudo: socket.pseudo });
         /* soundPlayer.play("./public/sounds/notification.mp3", (err) => {
              if (err) console.log(`Could not play sound: ${err}`);
          });*/
@@ -134,7 +120,10 @@ io.sockets.on("connection", (socket) => {
 
     socket.on("newAvatar", (newAvatar) => {
         socket.profilePicture = newAvatar;
-        io.emit("changedAvatar", { pseudo : socket.pseudo, message: socket.pseudo + " a changé son avatar.", image: socket.profilePicture });
+        io.emit("changedAvatar", { pseudo: socket.pseudo, message: socket.pseudo + " a changé son avatar.", image: socket.profilePicture });
     });
+
+}).on("error", (error) => {
+    console.log("Error : " + error);
 });
 

@@ -21,7 +21,12 @@
             </div>
 
             <div class="message-Box-Header-Option">
+                <div class="notification-box">
+                    <i class="notification" aria-hidden="true"><span class="badge" id="badge"></span></i>
+                    <div class="tooltip" id="tooltip"><p>Hey fdp</p></div>
+                </div>
                 <div class="nav-dropdown">
+
                     <span><i class="fas fa-cog"></i></span>
                     <div class="dropdown-content" id="dropdownContent">
                         <div id="currentProfileImage"></div>
@@ -35,7 +40,7 @@
         </main>
 
         <form action="/" methode="post" id="envoyerMessage" class="messages-inputArea">
-            <input type="text" id="input" autofocus class="messages-input"
+            <input type="text" id="input"  class="messages-input"
                 placeholder="Ecrivez quelque chose ici ..." />
             <input class="messages-sendButton" type="submit" value="Envoyer" id="nouveau_message" />
         </form>
@@ -43,11 +48,10 @@
 
     <script>
         $(document).ready(function () {
-            window.socket = io.connect("192.168.1.54:8080");
-
-            let pseudo = prompt("Quel est votre pseudo ?");
+            window.socket = io.connect("localhost:8080");
+            
+            window.pseudo = prompt("Quel est votre pseudo ?");
             socket.emit("pseudo", pseudo);
-
             document.title = pseudo + " - " + document.title;
 
             socket.on("nouveau_client", (message) => {
@@ -87,9 +91,35 @@
                 let message = $("#input").val();
                 socket.emit("message_client", message);
 
-                $("#input").val('').focus();
+                $("#input").val('');
                 return false;
             });
+
+            // --- Notifications
+            socket.on("newNotif", (notifCompteur) => {
+                console.log("Pseudo : " + notifCompteur.pseudo + " nb notif : " + notifCompteur.cptNotif);
+                //$(".tooltip").html("<p>Vous avez " + notifCompteur + " messages non lu</p>");
+                $("#badge").show();
+                $("#badge").html(notifCompteur.cptNotif);
+            });
+
+            
+            $("#input").unbind('click').click(() => {
+                socket.emit("resetNotification", {clientId : socket.id});                
+            });
+
+            $(".notification").hover(() => {
+                console.log("hover");
+                $("#tooltip").toggle();
+            });
+
+            socket.on("resetNotificationClient", (cptNotif) => {
+                console.log("resetNotificationClient : " + cptNotif);
+                $("#badge").html(cptNotif);
+                $("#badge").hide();
+            });
+
+            // ---- End notifications
 
             socket.on("allPictures", (allPictures) => {
                 allPictures.forEach(element => {
@@ -131,11 +161,10 @@
                     $("#currentPseudo").css('background-image', 'none');
                     $("#currentPseudo").addClass("current-profil-image").css("background-image", "url(images/photo_profile/" + message.image + ")");
                 }
-                
+
             });
+
         });
-
-
     </script>
 
     <script src='https://kit.fontawesome.com/a076d05399.js'></script>
