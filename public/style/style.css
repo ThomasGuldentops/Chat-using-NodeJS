@@ -372,3 +372,40 @@ body {
     -webkit-box-shadow: 0px 0px 5px 0px rgba(164, 164, 164, 1);
     box-shadow: 0px 0px 5px 0px rgba(164, 164, 164, 1);
 }
+
+
+
+.channels-box {
+    display: flex;
+    flex-flow: column wrap;
+    justify-content: space-between;
+    width: 25%;
+    max-width: 300px;
+    margin: 25px 10px;
+    height: calc(100% - 50px);
+    border: var(--border);
+    border-radius: 5px;
+    background: var(--messages-background);
+    box-shadow: 0 15px 15px -5px (rgba(0, 0, 0, 0.2));
+}
+
+.channels-box::-webkit-scrollbar {
+    width: 6px;
+}
+
+.channels-box::-webkit-scrollbar-track {
+    background: #ddd;
+}
+
+.channels-box::-webkit-scrollbar-thumb {
+    background: #bdbdbd;
+}
+
+.channels-box-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: var(--border);
+    background: #eee;
+    color: #666;
+}

@@ -8,6 +8,20 @@ const fs = require("fs")
 const pathBuilder = require("path");
 const publicDir = pathBuilder.join(__dirname, "/public");
 
+var mysql = require('mysql');
+
+var con = mysql.createConnection({
+  host: "localhost",
+  port: 8080,
+  user: "",
+  password: ""
+});
+
+con.connect(function(err) {
+  if (err) throw err;
+  console.log("Connected!");
+});
+
 //const soundPlayer = require('play-sound')({ player: "C:/Users/thoma/Downloads/mplayer-svn-38117/mplayer.exe" });
 //const emoji = require('node-emoji');
 
@@ -23,6 +37,8 @@ let mime = {
     js: 'application/javascript'
 };
 */
+
+
 //Public folder
 app.use(express.static(publicDir));
 
@@ -53,7 +69,7 @@ app.get("/", (req, res) => {
 io.sockets.on("connection", (socket) => {
     socket.cptNotif = 0;
 
-    console.log(" ------- \nId + nbNotif : " + socket.id + " : " + socket.cptNotif);
+    console.log(" ------- \nClient Id: " + socket.id);
     //let allEmoji = JSON.parse("raw.githubusercontent.com/omnidan/node-emoji/master/lib/emoji.json");
     //console.log("All emojis : " + allEmoji.key);
 
@@ -77,7 +93,7 @@ io.sockets.on("connection", (socket) => {
 
     socket.on("resetNotification", () => {
         socket.cptNotif = 0;
-        socket.emit("resetNotificationClient", socket.cptNotif); //prblème de synchro ?
+        socket.emit("resetNotificationClient", socket.cptNotif); //problème de synchro ?
     });
 
 

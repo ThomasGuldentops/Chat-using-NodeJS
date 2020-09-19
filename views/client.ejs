@@ -13,7 +13,14 @@
 </head>
 
 <body>
+    <div class="channels-box" id="channelsBox">
+        <header class="channels-box-header">
+            <div class="channels-box-header-title">
+                <i class="fas fa-comment-alt" id="optionButton"></i> Discussions
+            </div>
+        </header>
 
+    </div>
     <div class="messages-Box" id="messagesBox">
         <header class="message-Box-Header">
             <div class="message-Box-Header-Title">
@@ -23,7 +30,7 @@
             <div class="message-Box-Header-Option">
                 <div class="notification-box">
                     <i class="notification" aria-hidden="true"><span class="badge" id="badge"></span></i>
-                    <div class="tooltip" id="tooltip"><p>Hey fdp</p></div>
+                    <div class="tooltip" id="tooltip"><p></p></div>
                 </div>
                 <div class="nav-dropdown">
 
@@ -123,7 +130,6 @@
 
             socket.on("allPictures", (allPictures) => {
                 allPictures.forEach(element => {
-
                     $(".content-inner-modal-box").append(`
                             <div id=${element} class="picture-profile" style="background-image: url(images/photo_profile/${element})" ></div>`);
                 });
